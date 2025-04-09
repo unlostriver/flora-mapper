@@ -1,0 +1,28 @@
+{
+  "name": "@flora-mapper/app",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~52.0.43",
+    "expo-status-bar": "~2.0.1",
+    "nativewind": "^4.1.23",
+    "react": "18.3.1",
+    "react-native": "0.76.9",
+    "react-native-reanimated": "^3.16.2",
+    "react-native-safe-area-context": "^5.3.0",
+    "tailwindcss": "^3.4.17",
+    "react-dom": "18.3.1",
+    "react-native-web": "~0.19.13",
+    "@expo/metro-runtime": "~4.0.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
+  },
+  "private": true
+}
