@@ -3,9 +3,13 @@ import {View} from "react-native"
 import {registerRootComponent} from "expo"
 import {NavigationContainer} from "@react-navigation/native"
 import {createNativeStackNavigator} from "@react-navigation/native-stack"
+import Mapbox from "@rnmapbox/maps"
 import Map from "./map"
 import SignIn from "./signin"
 import "./root.css"
+
+Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_PUBLIC_TOKEN)
+Mapbox.setTelemetryEnabled(false)
 
 const Stack = createNativeStackNavigator()
 

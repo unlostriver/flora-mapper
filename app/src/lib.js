@@ -1,18 +1,21 @@
 import {initializeApp} from "firebase/app"
-import {getFirestore} from "firebase/firestore"
-import {getAuth, onAuthStateChanged, signInWithEmailAndPassword} from "firebase/auth"
+import {collection, getFirestore} from "firebase/firestore"
+import {initializeAuth, onAuthStateChanged, getReactNativePersistence, signInWithEmailAndPassword} from "firebase/auth"
+import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage"
 import {useState, useEffect} from "react"
 
-const app = initializeApp({
+const firebaseApp = initializeApp({
     apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
     projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
     storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID
+    appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
 })
 
-export const firebaseAuth = getAuth(app)
+export const firebaseAuth = initializeAuth(firebaseApp, {
+    persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+})
 export const useFirebaseUser = f => {
     const [user, setUser] = useState(null)
     useEffect(() => {
@@ -26,5 +29,6 @@ export const useFirebaseUser = f => {
 }
 export const firebasePasswordSignIn = (email, password) => signInWithEmailAndPassword(firebaseAuth, email, password)
 
-export const firestore = getFirestore(app)
+export const firestore = getFirestore(firebaseApp)
+export const firestoreCollection = path => collection(firestore, path)
 

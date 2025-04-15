@@ -1,6 +1,6 @@
 import {useState} from "react"
 import {View, Text, TextInput, Button, Alert} from "react-native"
-import {firebasePasswordSignIn} from "./firebase"
+import {firebasePasswordSignIn} from "./lib"
 
 export default ({navigation}) => {
     const [email, setEmail] = useState()
@@ -12,6 +12,7 @@ export default ({navigation}) => {
                 navigation.navigate("map")
             })
             .catch((error) => {
+                console.error(error)
                 Alert.alert("Try again", error.message, [
                     {text: "OK"}
                 ])
