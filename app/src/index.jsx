@@ -4,6 +4,7 @@ import {registerRootComponent} from "expo"
 import {NavigationContainer} from "@react-navigation/native"
 import {createNativeStackNavigator} from "@react-navigation/native-stack"
 import Mapbox from "@rnmapbox/maps"
+import {GestureHandlerRootView} from "react-native-gesture-handler"
 import Map from "./map"
 import SignIn from "./signin"
 import "./root.css"
@@ -17,20 +18,22 @@ const Root = () => {
     return (
         <View className="h-full w-full bg-white">
             <StatusBar style="auto" />
-            <NavigationContainer>
-                <Stack.Navigator initialRouteName="map">
-                    <Stack.Screen
-                        name="map"
-                        component={Map}
-                        options={{title: "Flora Mapper"}}
-                    />
-                    <Stack.Screen
-                        name="signin"
-                        component={SignIn}
-                        options={{title: "Sign In", presentation: "modal", headerShown: false}}
-                    />
-                </Stack.Navigator>
-            </NavigationContainer>
+            <GestureHandlerRootView>
+                <NavigationContainer>
+                    <Stack.Navigator initialRouteName="map">
+                        <Stack.Screen
+                            name="map"
+                            component={Map}
+                            options={{title: "Flora Mapper"}}
+                        />
+                        <Stack.Screen
+                            name="signin"
+                            component={SignIn}
+                            options={{title: "Sign In", presentation: "modal", headerShown: false}}
+                        />
+                    </Stack.Navigator>
+                </NavigationContainer>
+            </GestureHandlerRootView>
         </View>
     )
 }

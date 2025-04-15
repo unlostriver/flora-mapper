@@ -4,6 +4,7 @@ import {useState} from "react"
 import {geohashQueryBounds} from "geofire-common"
 import {firestoreCollection, useFirebaseUser} from "./lib"
 import {endAt, getDocs, orderBy, startAt, query} from "firebase/firestore"
+import MapSheet from "./map-sheet"
 
 export default ({navigation}) => {
     const [coordinates, setCoordinates] = useState()
@@ -87,6 +88,7 @@ export default ({navigation}) => {
                             fillExtrusionBase: ["get", "min_height"],
                             fillExtrusionOpacity: 0.8,
                         }}
+                        belowLayerID="road-label"
                     />
                 </VectorSource>
                 <UserLocation
@@ -94,6 +96,7 @@ export default ({navigation}) => {
                     showsUserHeadingIndicator={true}
                 />
             </MapView>
+            <MapSheet />
         </View>
     )
 }
