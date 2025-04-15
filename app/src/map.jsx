@@ -1,14 +1,17 @@
-import {View, Alert} from "react-native"
-import {MapView, Camera, VectorSource, FillExtrusionLayer, UserLocation} from "@rnmapbox/maps"
-import {useState} from "react"
-import {geohashQueryBounds} from "geofire-common"
-import {firestoreCollection, useFirebaseUser} from "./lib"
+import {View, Alert, Image, Text} from "react-native"
+import {MapView, Camera, VectorSource, FillExtrusionLayer, UserLocation, PointAnnotation} from "@rnmapbox/maps"
+import {useEffect, useState} from "react"
+import {geohashQueryBounds, distanceBetween} from "geofire-common"
+import {firebaseStorageRef, firestoreCollection, useFirebaseUser} from "./lib"
 import {endAt, getDocs, orderBy, startAt, query} from "firebase/firestore"
+import * as Location from "expo-location"
+import {getDownloadURL} from "firebase/storage"
 import MapSheet from "./map-sheet"
 
 export default ({navigation}) => {
     const [coordinates, setCoordinates] = useState()
-    const [submissions, setSubmissions] = useState()
+    const [submissions, setSubmissions] = useState([])
+    const [submissionImages, setSubmissionImages] = useState({})
 
     useFirebaseUser(user => {
         if (!user) {
@@ -16,7 +19,11 @@ export default ({navigation}) => {
         }
     })
 
-    const refreshSubmissions = (coordinates, radius) => {
+    useEffect(() => {
+        Location.requestForegroundPermissionsAsync()
+    }, [])
+
+    const refreshSubmissions = async (coordinates, radius) => {
         const bounds = geohashQueryBounds(coordinates, radius)
         const promises = []
         for (const b of bounds) {
@@ -28,27 +35,31 @@ export default ({navigation}) => {
             )
             promises.push(getDocs(q))
         }
-        Promise.all(promises)
-            .then(snapshots => {
-                const matchingDocs = []
-                for (const snap of snapshots) {
-                    for (const doc of snap.docs) {
-                        const submissionCoordinates = doc.get("coordinates")
-                        const distanceInKm = geofire.distanceBetween(submissionCoordinates, coordinates)
-                        const distanceInM = distanceInKm * 1000
-                        if (distanceInM <= radius) {
-                            matchingDocs.push(doc);
-                        }
+        try {
+            const snapshots = await Promise.all(promises)
+            const matchingDocs = []
+            const images = {}
+            for (const snap of snapshots) {
+                for (const doc of snap.docs) {
+                    const submissionCoordinates = doc.get("position")
+                    const distanceInKm = distanceBetween(submissionCoordinates, coordinates)
+                    const distanceInM = distanceInKm * 1000
+                    if (distanceInM <= radius) {
+                        matchingDocs.push(doc)
+                        const key = firebaseStorageRef(`submissions/${doc.get("submitter")}/${doc.id}`)
+                        images[doc.id] = await getDownloadURL(key)
                     }
                 }
-                setSubmissions(matchingDocs)
-            })
-            .catch(error => {
-                console.error(error)
-                Alert.alert("Try again", error.message, [
-                    {text: "OK"}
-                ])
-            })
+            }
+            setSubmissions(matchingDocs)
+            setSubmissionImages(images)
+        }
+        catch (error) {
+            console.error(error)
+            Alert.alert("Try again", error.message, [
+                {text: "OK"}
+            ])
+        }
     }
 
     const updateMap = (event) => {
@@ -61,6 +72,22 @@ export default ({navigation}) => {
         }
         setCoordinates(newCoordinates)
         refreshSubmissions(newCoordinates, 1000)
+    }
+
+    const newMarker = submission => {
+        const showDetails = () => {
+            navigation.navigate("submission", {submission})
+        }
+
+        return (
+            <PointAnnotation
+                key={submission.id}
+                id={submission.id}
+                coordinate={[submission.get("position")[1], submission.get("position")[0]]}
+                title={submission.get("species")}
+                onSelected={showDetails}
+            />
+        )
     }
 
     return (
@@ -94,6 +121,7 @@ export default ({navigation}) => {
                     visible={true}
                     showsUserHeadingIndicator={true}
                 />
+                {submissions.map(newMarker)}
             </MapView>
             <MapSheet navigation={navigation} />
         </View>

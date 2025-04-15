@@ -7,7 +7,7 @@ import {GestureHandlerRootView} from "react-native-gesture-handler"
 import {SafeAreaProvider, SafeAreaView} from "react-native-safe-area-context"
 import Map from "./map"
 import SignIn from "./signin"
-import Submission from "./submission"
+import {Submit, Submission} from "./submission"
 import "./root.css"
 
 Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_PUBLIC_TOKEN)
@@ -33,9 +33,14 @@ const Root = () => {
                                 options={{title: "Sign In", presentation: "modal", headerShown: false}}
                             />
                             <Stack.Screen
+                                name="submit"
+                                component={Submit}
+                                options={{title: "Identify Plant"}}
+                            />
+                            <Stack.Screen
                                 name="submission"
                                 component={Submission}
-                                options={{title: "Identify Plant"}}
+                                options={{title: "Sighting"}}
                             />
                         </Stack.Navigator>
                     </NavigationContainer>

@@ -1,20 +1,50 @@
-import {Image, View, Text, TextInput, Button, ScrollView} from "react-native"
+import {Alert, Image, View, Text, TextInput, Button, ScrollView} from "react-native"
 import DateTimePicker from "@react-native-community/datetimepicker"
-import {useEffect, useState} from "react"
-import {MapView, Camera, UserLocation} from "@rnmapbox/maps"
+import {useEffect, useRef, useState} from "react"
+import Mapbox, {MapView, Camera, UserLocation} from "@rnmapbox/maps"
+import {addDoc} from "firebase/firestore"
+import * as FileSystem from "expo-file-system"
+import {geohashForLocation} from "geofire-common"
+import {firestoreCollection, firebaseStorageRef, useFirebaseUser} from "./lib"
+import {getDownloadURL, uploadBytes, uploadString} from "firebase/storage"
 
-export default ({navigation, route}) => {
+export const Submit = ({navigation, route}) => {
+    // TODO: remove map animation
     // TODO: use ImagePicker.getPendingResultAsync
     const [date, setDate] = useState(new Date())
     const [datePicker, setDatePicker] = useState(false)
+    const [species, setSpecies] = useState(null)
+    const [position, setPosition] = useState()
+    const user = useFirebaseUser()
 
     useEffect(() => {
         navigation.setOptions({
             headerRight: () => <Button title="Submit" onPress={submit} />
         })
-    }, [])
+    })
 
-    const submit = () => {
+    const submit = async () => {
+        try {
+            const doc = await addDoc(firestoreCollection("submissions"), {
+                submitter: user.uid,
+                species,
+                date,
+                position,
+                geohash: geohashForLocation(position)
+            })
+            const blob = (await fetch(route.params.asset.uri)).blob()
+            const key = firebaseStorageRef(`submissions/${user.uid}/${doc.id}`)
+            await uploadBytes(key, blob, {contentType: route.params.asset.mimeType})
+            Alert.alert("Success", "Your submission has been accepted.", [
+                {text: "OK", onPress: () => navigation.navigate("map")}
+            ])
+        }
+        catch (error) {
+            console.error(error)
+            Alert.alert("Try Again", error.message, [
+                {text: "OK"}
+            ])
+        }
     }
 
     const datePickerChanged = (event, date) => {
@@ -24,18 +54,22 @@ export default ({navigation, route}) => {
         }
     }
 
+    const updateMap = (event) => {
+        setPosition([event.properties.center[1], event.properties.center[0]])
+    }
+
     return (
         <ScrollView>
             <View className="w-full h-full flex flex-col p-5 items-start gap-2">
                 <Image className="w-full aspect-square" source={{uri: route.params.asset.uri}} />
                 <Text>Species</Text>
-                <TextInput className="w-full p-2" />
+                <TextInput className="w-full p-2" onChangeText={setSpecies} />
                 <Text>Date</Text>
                 <Button title={date.toDateString()} onPress={() => setDatePicker(true)} />
                 {datePicker && <DateTimePicker value={date} mode="date" onChange={datePickerChanged} />}
                 <Text>Location</Text>
                 <View className="w-full aspect-square flex flex-col items-stretch">
-                    <MapView style={{flex: 1}}>
+                    <MapView style={{flex: 1}} onMapIdle={updateMap}>
                         <Camera
                             zoomLevel={15}
                             followZoomLevel={15}
@@ -47,6 +81,27 @@ export default ({navigation, route}) => {
                         />
                     </MapView>
                 </View>
+            </View>
+        </ScrollView>
+    )
+}
+
+export const Submission = ({route}) => {
+    const submission = route.params.submission
+    const [imageURL, setImageURL] = useState()
+
+    useEffect(() => {
+        const key = firebaseStorageRef(`submissions/${submission.get("submitter")}/${submission.id}`)
+        getDownloadURL(key)
+            .then(setImageURL)
+    }, [])
+
+    return (
+        <ScrollView>
+            <View className="w-full h-full flex flex-col p-5 items-start gap-2">
+                {imageURL && <Image className="w-full aspect-square" source={{uri: imageURL}} />}
+                <Text>Species</Text>
+                <Text>{submission.get("species")}</Text>
             </View>
         </ScrollView>
     )

@@ -40,7 +40,7 @@ export default ({navigation}) => {
     const submit = async asset => {
         asset = await asset
         if (asset) {
-            navigation.navigate("submission", {asset})
+            navigation.navigate("submit", {asset})
         }
     }
 
