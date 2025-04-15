@@ -17,7 +17,6 @@ export default ({navigation}) => {
     })
 
     const refreshSubmissions = (coordinates, radius) => {
-        console.debug("refreshing", coordinates)
         const bounds = geohashQueryBounds(coordinates, radius)
         const promises = []
         for (const b of bounds) {
@@ -96,7 +95,7 @@ export default ({navigation}) => {
                     showsUserHeadingIndicator={true}
                 />
             </MapView>
-            <MapSheet />
+            <MapSheet navigation={navigation} />
         </View>
     )
 }

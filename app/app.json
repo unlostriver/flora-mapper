@@ -41,6 +41,13 @@
         {
           "locationWhenInUsePermission": "Automatically determine current location when submitting a sighting."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Upload photos to submit your plant sightings.",
+          "cameraPermission": "Take photos to submit your plant sightings."
+        }
       ]
     ]
   }
