@@ -1,4 +1,4 @@
-import {View} from "react-native"
+import {View, Image, LogBox} from "react-native"
 import {registerRootComponent} from "expo"
 import {NavigationContainer} from "@react-navigation/native"
 import {createNativeStackNavigator} from "@react-navigation/native-stack"
@@ -12,6 +12,7 @@ import "./root.css"
 
 Mapbox.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_PUBLIC_TOKEN)
 Mapbox.setTelemetryEnabled(false)
+LogBox.ignoreLogs(["ViewTagResolver"])
 
 const Stack = createNativeStackNavigator()
 

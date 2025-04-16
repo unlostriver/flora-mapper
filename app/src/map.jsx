@@ -1,8 +1,8 @@
-import {View, Alert, Image, Text} from "react-native"
+import {View, Alert, Image, Button} from "react-native"
 import {MapView, Camera, VectorSource, FillExtrusionLayer, UserLocation, PointAnnotation} from "@rnmapbox/maps"
 import {useEffect, useState} from "react"
 import {geohashQueryBounds, distanceBetween} from "geofire-common"
-import {firebaseStorageRef, firestoreCollection, useFirebaseUser} from "./lib"
+import {firebaseSignOut, firestoreCollection, useFirebaseUser} from "./lib"
 import {endAt, getDocs, orderBy, startAt, query} from "firebase/firestore"
 import * as Location from "expo-location"
 import {getDownloadURL} from "firebase/storage"
@@ -21,6 +21,14 @@ export default ({navigation}) => {
     useEffect(() => {
         Location.requestForegroundPermissionsAsync()
     }, [])
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerRight: () => (
+                <Button onPress={firebaseSignOut} title="My Profile" />
+            )
+        })
+    }, [navigation])
 
     const refreshSubmissions = async (coordinates, radius) => {
         const bounds = geohashQueryBounds(coordinates, radius)

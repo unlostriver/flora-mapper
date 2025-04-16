@@ -1,7 +1,7 @@
 import {initializeApp} from "firebase/app"
 import {collection, getFirestore} from "firebase/firestore"
 import {getStorage, ref} from "firebase/storage"
-import {initializeAuth, onAuthStateChanged, getReactNativePersistence, signInWithEmailAndPassword} from "firebase/auth"
+import {initializeAuth, onAuthStateChanged, getReactNativePersistence, signInWithEmailAndPassword, signOut} from "firebase/auth"
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage"
 import {useState, useEffect} from "react"
 
@@ -29,6 +29,7 @@ export const useFirebaseUser = f => {
     return user
 }
 export const firebasePasswordSignIn = (email, password) => signInWithEmailAndPassword(firebaseAuth, email, password)
+export const firebaseSignOut = () => signOut(firebaseAuth)
 
 export const firestore = getFirestore(firebaseApp)
 export const firestoreCollection = path => collection(firestore, path)
