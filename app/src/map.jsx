@@ -11,7 +11,6 @@ import MapSheet from "./map-sheet"
 export default ({navigation}) => {
     const [coordinates, setCoordinates] = useState()
     const [submissions, setSubmissions] = useState([])
-    const [submissionImages, setSubmissionImages] = useState({})
 
     useFirebaseUser(user => {
         if (!user) {
@@ -38,7 +37,6 @@ export default ({navigation}) => {
         try {
             const snapshots = await Promise.all(promises)
             const matchingDocs = []
-            const images = {}
             for (const snap of snapshots) {
                 for (const doc of snap.docs) {
                     const submissionCoordinates = doc.get("position")
@@ -46,13 +44,10 @@ export default ({navigation}) => {
                     const distanceInM = distanceInKm * 1000
                     if (distanceInM <= radius) {
                         matchingDocs.push(doc)
-                        const key = firebaseStorageRef(`submissions/${doc.get("submitter")}/${doc.id}`)
-                        images[doc.id] = await getDownloadURL(key)
                     }
                 }
             }
             setSubmissions(matchingDocs)
-            setSubmissionImages(images)
         }
         catch (error) {
             console.error(error)

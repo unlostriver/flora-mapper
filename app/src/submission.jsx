@@ -6,7 +6,6 @@ import {addDoc} from "firebase/firestore"
 import * as FileSystem from "expo-file-system"
 import {geohashForLocation} from "geofire-common"
 import {firestoreCollection, firebaseStorageRef, useFirebaseUser} from "./lib"
-import {getDownloadURL, uploadBytes, uploadString} from "firebase/storage"
 
 export const Submit = ({navigation, route}) => {
     // TODO: remove map animation
@@ -32,9 +31,18 @@ export const Submit = ({navigation, route}) => {
                 position,
                 geohash: geohashForLocation(position)
             })
-            const blob = (await fetch(route.params.asset.uri)).blob()
-            const key = firebaseStorageRef(`submissions/${user.uid}/${doc.id}`)
-            await uploadBytes(key, blob, {contentType: route.params.asset.mimeType})
+            await FileSystem.uploadAsync(
+                `${process.env.EXPO_PUBLIC_API_URL}/image/${doc.id}`,
+                route.params.asset.uri,
+                {
+                    headers: {
+                        "x-api-key": process.env.EXPO_PUBLIC_API_KEY
+                    },
+                    httpMethod: "PUT",
+                    fieldName: "image",
+                    uploadType: FileSystem.FileSystemUploadType.MULTIPART
+                }
+            )
             Alert.alert("Success", "Your submission has been accepted.", [
                 {text: "OK", onPress: () => navigation.navigate("map")}
             ])
@@ -88,18 +96,11 @@ export const Submit = ({navigation, route}) => {
 
 export const Submission = ({route}) => {
     const submission = route.params.submission
-    const [imageURL, setImageURL] = useState()
-
-    useEffect(() => {
-        const key = firebaseStorageRef(`submissions/${submission.get("submitter")}/${submission.id}`)
-        getDownloadURL(key)
-            .then(setImageURL)
-    }, [])
 
     return (
         <ScrollView>
             <View className="w-full h-full flex flex-col p-5 items-start gap-2">
-                {imageURL && <Image className="w-full aspect-square" source={{uri: imageURL}} />}
+                <Image className="w-full aspect-square" src={`${process.env.EXPO_PUBLIC_API_URL}/image/${submission.id}`} />
                 <Text>Species</Text>
                 <Text>{submission.get("species")}</Text>
             </View>
