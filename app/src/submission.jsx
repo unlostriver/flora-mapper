@@ -124,8 +124,10 @@ export const Submission = ({route}) => {
         <ScrollView>
             <View className="w-full h-full flex flex-col p-5 items-start gap-2">
                 <Image className="w-full aspect-square" src={`${process.env.EXPO_PUBLIC_API_URL}/image/${submission.id}`} />
-                <Text>Species</Text>
-                <Text>{submission.get("species")}</Text>
+                <Text className="text-xl font-bold">Species</Text>
+                <Text className="text-xl">{submission.get("species")}</Text>
+                <Text className="text-xl font-bold">Submission date</Text>
+                <Text className="text-xl">{submission.get("date").toDate().toDateString()}</Text>
             </View>
         </ScrollView>
     )
