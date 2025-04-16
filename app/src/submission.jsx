@@ -35,9 +35,12 @@ export const Submit = ({navigation, route}) => {
                 `${process.env.EXPO_PUBLIC_API_URL}/image/${doc.id}`,
                 route.params.asset.uri,
                 {
-                    headers: {"x-api-key": process.env.EXPO_PUBLIC_API_KEY},
+                    headers: {
+                        "x-api-key": process.env.EXPO_PUBLIC_API_KEY
+                    },
                     httpMethod: "PUT",
-                    fieldName: "image"
+                    fieldName: "image",
+                    uploadType: FileSystem.FileSystemUploadType.MULTIPART
                 }
             )
             Alert.alert("Success", "Your submission has been accepted.", [
