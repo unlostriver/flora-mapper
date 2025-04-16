@@ -13,7 +13,7 @@ app = FastAPI()
 
 @app.middleware("http")
 async def check_api_key(req, next):
-    if req.headers.get("x-api-key") != "PhZGgqvAc0YWn663b7QNCVITFATo33DULGpMZWUeWBK56OfC19T":
+    if req.method != "GET" and req.headers.get("x-api-key") != "PhZGgqvAc0YWn663b7QNCVITFATo33DULGpMZWUeWBK56OfC19T":
         return JSONResponse({}, status_code=401)
     return await next(req)
 
