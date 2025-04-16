@@ -5,10 +5,29 @@ from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from pathlib import Path
 from glob import glob
+from PIL import Image
+from plantnet.utils import load_model
+from torchvision.models import resnet50
+import torchvision.transforms as transforms
+import numpy as np
+import torch
 import shutil
+import json
 
 
 app = FastAPI()
+model = resnet50(num_classes=1081)
+load_model(model, filename="resnet50_weights_best_acc.tar", use_gpu=False)
+model.eval()
+preprocess = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(224),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+])
+with open("species.json") as f:
+    species = json.load(f)
+    species = list(species.values())
 
 
 @app.middleware("http")
@@ -19,8 +38,14 @@ async def check_api_key(req, next):
 
 
 @app.post("/classify")
-def classify():
-    return {"species": ""}
+def classify(image: UploadFile):
+    image = Image.open(image).convert("RGB")
+    tensor = preprocess(image)
+    batch = tensor.unsqueeze(0)
+    with torch.no_grad():
+        output = model(batch)[0]
+        class_ = np.argmax(output)
+    return {"species": species[class_]}
 
 
 @app.get("/image/{submission_id}")

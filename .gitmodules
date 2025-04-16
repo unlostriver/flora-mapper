@@ -1,0 +1,3 @@
+[submodule "api/plantnet"]
+	path = api/plantnet
+	url = git@github.com:plantnet/PlantNet-300K.git
