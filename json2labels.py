@@ -57,10 +57,9 @@ def prepare_yolo_dataset(data_root, json_path, output_dir="yolo_format"):
                 # Create YOLO annotation file
                 yolo_ann = f"{class_id} 0.5 0.5 1.0 1.0"
                 ann_file = os.path.join(yolo_dir, "labels", split, f"{plant_id}_{img_id}.txt")
-                with open(ann_file, "w", encoding='utf-8') as f:  # Added encoding here too
+                with open(ann_file, "w", encoding='utf-8') as f:
                     f.write(yolo_ann)
     
-    # Create dataset.yaml file with UTF-8 encoding
     yaml_content = f"""
 path: {os.path.abspath(yolo_dir)}
 train: images/train
@@ -83,9 +82,9 @@ names: {classes}
     return yaml_path, len(classes)
 
 if __name__ == "__main__":
-    # Configuration
-    DATA_ROOT = "50k/plantnet_50K/images"  # Root directory containing train/val/test folders
-    JSON_PATH = "50k/plantnet_50K/50k_plants.json"  # Path to your JSON file
+
+    DATA_ROOT = "50k/plantnet_50K/images"  
+    JSON_PATH = "50k/plantnet_50K/50k_plants.json"  
     
     print("Preparing dataset...")
     yaml_path, num_classes = prepare_yolo_dataset(DATA_ROOT, JSON_PATH)
