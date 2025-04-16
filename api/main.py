@@ -39,7 +39,7 @@ async def check_api_key(req, next):
 
 @app.post("/classify")
 def classify(image: UploadFile):
-    image = Image.open(image).convert("RGB")
+    image = Image.open(image.file).convert("RGB")
     tensor = preprocess(image)
     batch = tensor.unsqueeze(0)
     with torch.no_grad():

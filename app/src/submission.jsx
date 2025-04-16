@@ -22,6 +22,29 @@ export const Submit = ({navigation, route}) => {
         })
     })
 
+    useEffect(() => {
+        FileSystem.uploadAsync(
+            `${process.env.EXPO_PUBLIC_API_URL}/classify`,
+            route.params.asset.uri,
+            {
+                headers: {
+                    "x-api-key": process.env.EXPO_PUBLIC_API_KEY
+                },
+                httpMethod: "POST",
+                fieldName: "image",
+                uploadType: FileSystem.FileSystemUploadType.MULTIPART
+            }
+        )
+            .then(res => JSON.parse(res.body))
+            .then(body => setSpecies(body.species))
+            .catch(error => {
+                console.error(error)
+                Alert.alert("Try again", "Unable to classify the plant.", [
+                    {text: "OK"}
+                ])
+            })
+    }, [])
+
     const submit = async () => {
         try {
             const doc = await addDoc(firestoreCollection("submissions"), {
@@ -71,7 +94,7 @@ export const Submit = ({navigation, route}) => {
             <View className="w-full h-full flex flex-col p-5 items-start gap-2">
                 <Image className="w-full aspect-square" source={{uri: route.params.asset.uri}} />
                 <Text>Species</Text>
-                <TextInput className="w-full p-2" onChangeText={setSpecies} />
+                <TextInput className="w-full p-2" onChangeText={setSpecies}>{species}</TextInput>
                 <Text>Date</Text>
                 <Button title={date.toDateString()} onPress={() => setDatePicker(true)} />
                 {datePicker && <DateTimePicker value={date} mode="date" onChange={datePickerChanged} />}
